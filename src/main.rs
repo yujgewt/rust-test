@@ -139,9 +139,9 @@ fn main() {
     */
 
     
-    let mut a:Aes = Aes::new([1,2,3,4,5,6,7,8,9,10,11,12,13,14,1,16],[0xf,0xf,0xf,0xf,0xf,0xf,0xf,0xf,0xf,0xf,0xf,0xf,0xf,0xf,0xf,0xf]);
+    let mut a:Aes = Aes::new([1,2,3,4,5,6,7,8,9,10,11,12,13,14,1,16],[0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc,0xd,0xe,0xf]);
     a.encrypt();
-    println!("{:?}",a);
+    //println!("{:?}",a);
     
 }
 
@@ -168,9 +168,14 @@ impl Aes {
     fn encrypt(&mut self) {
         println!("This is encrypt.");
         
-        self.AddRoundKey();
-        self.SubBytes();
 
+
+        self.print(self.round_plaintext);
+        //self.AddRoundKey();
+        //self.print(self.plaintext);
+        //self.SubBytes();
+        self.ShiftRows();
+        self.print(self.round_plaintext);
 
 
 
@@ -179,8 +184,19 @@ impl Aes {
         
     }
 
+    fn print(&mut self, v:[u8;16]){
+        
+        for i in 0..4{
+            for j in 0..4{
+                print!("{:X} ",v[j*4+i]);
+            }
+            print!("\n");
+        }
+        
+    }
+
     fn xor(&self,a:[u8;16],b:[u8;16])-> [u8;16] {
-        println!("{:?} {:?}",a,b);
+        //println!("{:?} {:?}",a,b);
         let mut n:[u8;16]=[0;16];
         for i in 0..16{
             n[i] = a[i]^b[i];
@@ -232,6 +248,46 @@ impl Aes {
         for i in 0..16{
             self.round_plaintext[i]=self.sbox[self.round_plaintext[i] as usize];
         }
+    }
+    
+
+    /*
+    1 2 3 4     1 (1) 1 1 2 (2) 2 2 3 (3) 3 3 4 (4) 4 4
+    1 2 3 4 <-1
+    1 2 3 4 <-2
+    1 2 3 4 <-3
+
+    0 1 2 3  2 3 0 1
+    
+    0 ->2
+    1 ->3
+    2 ->0
+
+    (|2+i|)%4
+
+
+    1 2 3 4    3 4 1 2
+    */
+
+    fn ShiftRows(&mut self){
+
+        println!("ShiftRows -> {:?}",self.round_plaintext);
+        let mut temp:[u8;4]=[0;4];
+        for i in 0..4{
+
+            temp[0] = self.round_plaintext[i+4*((0+i)%4)];
+            temp[1] = self.round_plaintext[i+4*((1+i)%4)];
+            temp[2] = self.round_plaintext[i+4*((2+i)%4)];
+            temp[3] = self.round_plaintext[i+4*((3+i)%4)];
+            //println!("{}<-{}",i+4*(j%4),i+4*((j+i)%4));
+
+            self.round_plaintext[i+4*0] = temp[0];
+            self.round_plaintext[i+4*1] = temp[1];
+            self.round_plaintext[i+4*2] = temp[2];
+            self.round_plaintext[i+4*3] = temp[3];
+        }
+
+        println!("ShiftRows -> {:?}",self.round_plaintext);
     }
 }
 
