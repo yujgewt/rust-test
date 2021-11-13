@@ -139,7 +139,7 @@ fn main() {
     */
 
     
-    let mut a:Aes = Aes::new([1,2,3,4,5,6,7,8,9,10,11,12,13,14,1,16],[0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc,0xd,0xe,0xf]);
+    let mut a:Aes = Aes::new([1,2,3,4,5,6,7,8,9,10,11,12,13,14,1,16],[0x48,0x79,0x43,0x39,0x79,0x5,0x6,0x7,0x43,0x9,0xa,0xb,0x39,0xd,0xe,0xf]);
     a.encrypt();
     //println!("{:?}",a);
     
@@ -174,8 +174,9 @@ impl Aes {
         //self.AddRoundKey();
         //self.print(self.plaintext);
         //self.SubBytes();
-        self.ShiftRows();
-        self.print(self.round_plaintext);
+        //self.ShiftRows();
+        //self.print(self.round_plaintext);
+        self.MixColumns();
 
 
 
@@ -289,6 +290,34 @@ impl Aes {
 
         println!("ShiftRows -> {:?}",self.round_plaintext);
     }
+
+
+    fn MixColumns(&mut self){
+        let m = [2,1,1,3,3,2,1,1,1,3,2,1,1,1,3,2];
+        for i in 0..4{
+            let mut b:[u8;4] = [0;4];
+            b[0] = m[i];
+            b[1] = m[1*4+i];
+            b[2] = m[2*4+i];
+            b[3] = m[3*4+i];
+            
+            
+            let mut s:u8 = 0;
+            for j in 0..4{
+                if b[j] == 2{
+                    
+                    s = s^(self.round_plaintext[i*4+j]<<1);
+                }else if b[j] ==3{
+                    
+                    s = s^(self.round_plaintext[i*4+j]^(self.round_plaintext[i*4+j]<<1));
+                }else{
+                    s = s^self.round_plaintext[i*4+j];
+                }
+            }
+            println!("s = {:x}",s);
+        }
+    }
+
 }
 
 
