@@ -1,7 +1,3 @@
-use G;
-
-
-
 
 
 
@@ -10,13 +6,12 @@ mod tests {
     use super::*;
 
 
-
     #[test]
     fn test_G() {
         println!("test started.");
-        println!("{:0X}",G(1,1));
+        println!("{:0X}",KeyExpansion(1));
         
-        //assert_eq!(1,RotateLeft(0b10000000000000000000000000000000,1));
+        
     }
 
 }
